@@ -1,7 +1,6 @@
 package com.kls.fetchtakehometest
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -24,13 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kls.fetchtakehometest.ui.theme.FetchTakeHomeTestTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.kls.fetchtakehometest.data.Result
@@ -43,12 +38,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FetchTakeHomeTestTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box {
+                        // A simple screen to display the list of items.
+                        // If there were multiple pages, I'd add navigation.
                         MainScreen()
                     }
                 }
@@ -122,8 +118,38 @@ fun LoadingView(
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainScreenPreview() {
     FetchTakeHomeTestTheme {
+        // Simulate the state of `groupedItems` for the preview
+        val groupedItems = Result.Success(
+            data = mapOf(
+                1 to listOf(
+                    Data(id = 101, listId = 1, name = "Item A"),
+                    Data(id = 102, listId = 1, name = "Item B")
+                ),
+                2 to listOf(
+                    Data(id = 203, listId = 2, name = "Item C")
+                )
+            )
+        )
 
+        // Call the MainScreen and pass the simulated state
+        MainScreenPreviewContent(groupedItems)
+    }
+}
+
+@Composable
+fun MainScreenPreviewContent(groupedItems: Result<Map<Int, List<Data>>>) {
+    when (groupedItems) {
+        is Result.Loading -> {
+            LoadingView()
+        }
+        is Result.Success -> {
+            val groupedData = groupedItems.data
+            ItemsList(groupedData = groupedData)
+        }
+        is Result.Error -> {
+            Text("Error: ${groupedItems.exception.message}")
+        }
     }
 }
